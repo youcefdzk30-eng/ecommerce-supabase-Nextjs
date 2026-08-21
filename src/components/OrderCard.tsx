@@ -16,6 +16,13 @@ export function OrderCard({ order, onDelete }: OrderCardProps) {
   const { user } = useAuth();
   const deleteOrder = useDeleteOrder();
 
+  const statusSteps = ["pending", "processing", "shipped", "delivered"] as const;
+  const currentStepIndex = Math.max(
+    0,
+    statusSteps.indexOf(order.status as (typeof statusSteps)[number]),
+  );
+  const progressPercent = order.status === "cancelled" ? 0 : ((currentStepIndex + 1) / statusSteps.length) * 100;
+
   const handleDeleteOrder = async () => {
     try {
       await deleteOrder.mutateAsync({
@@ -33,14 +40,16 @@ export function OrderCard({ order, onDelete }: OrderCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="bg-muted/20">
-        <div className="flex flex-col justify-between md:flex-row">
-          <CardTitle className="text-lg">Order #{order.id}</CardTitle>
-          <div className="mt-2 flex items-center space-x-4 md:mt-0">
-            <span className="text-muted-foreground text-sm">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div>
+            <CardTitle className="text-lg">Order #{order.id}</CardTitle>
+            <p className="text-muted-foreground mt-1 text-sm">
               {order.created_at
                 ? format(new Date(order.created_at), "MMM dd, yyyy")
                 : "N/A"}
-            </span>
+            </p>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2 md:mt-0">
             <span
               className={`rounded-full px-2 py-1 text-xs ${
                 order.status === "delivered"
@@ -69,6 +78,23 @@ export function OrderCard({ order, onDelete }: OrderCardProps) {
             )}
           </div>
         </div>
+
+        {order.status !== "cancelled" && (
+          <div className="mt-4 space-y-2">
+            <div className="flex justify-between text-[10px] uppercase tracking-wide text-slate-500">
+              <span>Pending</span>
+              <span>Processing</span>
+              <span>Shipped</span>
+              <span>Delivered</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

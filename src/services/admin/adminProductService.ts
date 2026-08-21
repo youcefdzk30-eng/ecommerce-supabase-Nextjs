@@ -28,14 +28,20 @@ export interface ProductWithDetails extends ProductType {
  * Admin service for product management
  * Requires admin privileges for all operations
  */
-const buildProductPayload = (productData: Partial<CreateProductData> | UpdateProductData) => ({
-  ...productData,
-  title: productData.title,
-  name: productData.title ?? (productData as any).name,
-  image: productData.image,
-  image_url: productData.image,
-  updated_at: new Date().toISOString(),
-});
+const buildProductPayload = (productData: Partial<CreateProductData> | UpdateProductData) => {
+  const payload: Record<string, unknown> = {
+    ...(productData.title !== undefined ? { title: productData.title } : {}),
+    ...(productData.description !== undefined ? { description: productData.description } : {}),
+    ...(productData.price !== undefined ? { price: productData.price } : {}),
+    ...(productData.image !== undefined ? { image: productData.image } : {}),
+    ...(productData.stock !== undefined ? { stock: productData.stock } : {}),
+    ...(productData.sku !== undefined ? { sku: productData.sku } : {}),
+    ...(productData.category_id !== undefined ? { category_id: productData.category_id } : {}),
+    updated_at: new Date().toISOString(),
+  };
+
+  return payload;
+};
 
 const runReviewsQuery = async (product: any) => {
   const reviewCandidateFields: Array<"product_id" | "id"> = ["product_id", "id"];
@@ -112,11 +118,13 @@ export const adminProductService = {
   async createProduct(productData: CreateProductData): Promise<ProductType> {
     try {
       const payload = {
-        ...productData,
         title: productData.title,
-        name: productData.title,
-        image: productData.image,
-        image_url: productData.image,
+        description: productData.description,
+        price: productData.price,
+        ...(productData.image ? { image: productData.image } : {}),
+        stock: productData.stock,
+        ...(productData.sku ? { sku: productData.sku } : {}),
+        ...(productData.category_id !== undefined ? { category_id: productData.category_id } : {}),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -128,29 +136,6 @@ export const adminProductService = {
         .single();
 
       if (error) {
-        if (error.code === "42703" || error.code === "42P01") {
-          const fallbackPayload = {
-            ...productData,
-            name: productData.title,
-            image_url: productData.image,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-
-          const fallbackResult = await supabase
-            .from("products")
-            .insert(fallbackPayload)
-            .select()
-            .single();
-
-          if (fallbackResult.error) {
-            console.error("Error creating product with fallback payload:", fallbackResult.error);
-            throw fallbackResult.error;
-          }
-
-          return fallbackResult.data;
-        }
-
         console.error("Error creating product:", error);
         throw error;
       }

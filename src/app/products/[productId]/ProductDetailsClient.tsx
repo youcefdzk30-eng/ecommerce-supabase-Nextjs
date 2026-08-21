@@ -45,7 +45,18 @@ export default function ProductDetailsClient({
     ? [product.image, product.image, product.image, product.image]
     : ["/placeholder-product.jpg"];
 
- 
+  const featureHighlights = [
+    "Premium quality materials",
+    "Designed for daily use",
+    "Fast dispatch and easy returns",
+  ];
+
+  const productSpecs = [
+    { label: "Brand", value: "DMT Store" },
+    { label: "SKU", value: product.sku || "N/A" },
+    { label: "Availability", value: product.stock > 0 ? "In stock" : "Low stock" },
+    { label: "Delivery", value: "2-5 business days" },
+  ];
 
   const handleAddToCart = async () => {
     try {
@@ -244,6 +255,19 @@ export default function ProductDetailsClient({
               {product.description}
             </motion.p>
 
+            <motion.div
+              className="flex flex-wrap gap-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+            >
+              {featureHighlights.map((feature) => (
+                <Badge key={feature} variant="secondary" className="rounded-full border border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-200">
+                  {feature}
+                </Badge>
+              ))}
+            </motion.div>
+
             {/* Quantity and Add to Cart */}
             <motion.div
               className="space-y-4"
@@ -338,6 +362,38 @@ export default function ProductDetailsClient({
             </motion.div>
           </div>
         </div>
+
+        <motion.div
+          className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="mb-4 text-lg font-semibold">Product details</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {productSpecs.map((spec) => (
+                  <div key={spec.label} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-800 dark:bg-slate-900/30">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">{spec.label}</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">{spec.value}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="mb-4 text-lg font-semibold">Why customers love it</h3>
+              <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-emerald-500" /> Premium build quality and long-term durability</li>
+                <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-emerald-500" /> Thoughtful design for comfort, performance, and style</li>
+                <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 text-emerald-500" /> Trusted support and quick fulfillment from DMT Store</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Product Details Tabs */}
         <motion.div

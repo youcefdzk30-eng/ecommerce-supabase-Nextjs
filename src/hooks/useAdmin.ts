@@ -11,8 +11,8 @@ interface AdminData {
 }
 
 /**
- * Custom hook to check if the current user has admin privileges
- * Uses the admin_users view which filters profiles where role='admin'
+ * Custom hook to check if the current user has admin privileges.
+ * The app stores admin access in the profiles.role field, not in a separate view.
  */
 export function useAdmin(): AdminData {
   const { user } = useAuth();
@@ -32,12 +32,11 @@ export function useAdmin(): AdminData {
         setLoading(true);
         setError(null);
 
-        // Use maybeSingle so a non-admin user is treated as a normal empty result,
-        // not an exception that logs noisy console errors.
         const { data, error: queryError } = await supabase
-          .from("admin_users")
-          .select("profile_id")
+          .from("profiles")
+          .select("profile_id, role")
           .eq("profile_id", user.id)
+          .eq("role", "admin")
           .maybeSingle();
 
         if (queryError) {
@@ -64,17 +63,18 @@ export function useAdmin(): AdminData {
 }
 
 /**
- * Utility function to check admin status without hooks
- * Useful for server-side or one-time checks
+ * Utility function to check admin status without hooks.
+ * Useful for server-side or one-time checks.
  */
 export async function checkIsAdmin(userId: string): Promise<boolean> {
   if (!userId) return false;
 
   try {
     const { data, error } = await supabase
-      .from("admin_users")
+      .from("profiles")
       .select("profile_id")
       .eq("profile_id", userId)
+      .eq("role", "admin")
       .maybeSingle();
 
     if (error) {

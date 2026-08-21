@@ -4,13 +4,16 @@ import { toast } from 'sonner';
 
 export async function updateProfile(
   userId: string,
-  updates: Partial<ProfileType>
+  updates: Partial<ProfileType>,
 ): Promise<ProfileType | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
-      .eq('id', userId)
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('profile_id', userId)
       .select()
       .single();
 

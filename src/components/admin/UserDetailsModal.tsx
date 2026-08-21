@@ -29,6 +29,7 @@ import {
 } from "@/services/admin/adminUserService";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface UserDetailsModalProps {
   isOpen: boolean;
@@ -53,6 +54,7 @@ export function UserDetailsModal({
   user,
 }: UserDetailsModalProps) {
   const [userDetails, setUserDetails] = useState<UserWithStats | null>(null);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   const fetchUserDetails = useCallback(async () => {
     if (!user) return;
@@ -63,6 +65,24 @@ export function UserDetailsModal({
       console.error("Error fetching user details:", error);
     }
   }, [user]);
+
+  const handleRoleChange = async (nextRole: "admin" | "user") => {
+    if (!user) return;
+
+    try {
+      setIsUpdatingRole(true);
+      await adminUserService.updateUserRole(user.profile_id, nextRole);
+      setUserDetails((current) =>
+        current ? { ...current, role: nextRole } : { ...user, role: nextRole },
+      );
+      toast.success(`Role updated to ${nextRole}`);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      toast.error("Failed to update user role");
+    } finally {
+      setIsUpdatingRole(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen && user) {
@@ -128,6 +148,36 @@ export function UserDetailsModal({
                       ? format(new Date(displayUser.created_at), "MMM dd, yyyy")
                       : "No date"}
                   </p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/20">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Quick actions</p>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Customer management</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`mailto:${displayUser.email ?? "support@dmtstore.com"}`)}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Contact
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRoleChange(displayUser.role === "admin" ? "user" : "admin")}
+                    disabled={isUpdatingRole}
+                  >
+                    <Shield className="mr-2 h-4 w-4" />
+                    {isUpdatingRole ? "Updating..." : displayUser.role === "admin" ? "Demote to user" : "Promote to admin"}
+                  </Button>
                 </div>
               </div>
             </div>
