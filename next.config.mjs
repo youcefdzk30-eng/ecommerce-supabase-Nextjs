@@ -43,26 +43,31 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
-images: {
-  remotePatterns: [
-    {
-      hostname: "**",
-    },
-    {
-      hostname: "fakestoreapi.com",
-    },
-  ],
-  dangerouslyAllowSVG: true,
-  unoptimized: process.env.NODE_ENV === "development",
-},
-async headers() {
-  return [
-    {
-      source: "/(.*)",
-      headers: securityHeaders,
-    },
-  ];
-},
+  // Ensure Turbopack uses the project folder as the workspace root to avoid
+  // picking a parent folder that contains another lockfile.
+  turbopack: {
+    root: "E:/projects/try get hub store/ecommerce-supabase-Nextjs",
+  },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "**",
+      },
+      {
+        hostname: "fakestoreapi.com",
+      },
+    ],
+    dangerouslyAllowSVG: true,
+    unoptimized: process.env.NODE_ENV === "development",
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: securityHeaders,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
