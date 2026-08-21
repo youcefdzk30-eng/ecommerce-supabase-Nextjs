@@ -11,7 +11,7 @@ const securityHeaders = [
   { key: 'X-XSS-Protection', value: '1; mode=block' },
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = await updateSession(request);
 
   securityHeaders.forEach(({ key, value }) => {
