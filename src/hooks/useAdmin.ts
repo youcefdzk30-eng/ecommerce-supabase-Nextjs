@@ -32,26 +32,22 @@ export function useAdmin(): AdminData {
         setLoading(true);
         setError(null);
 
-        // Check if user exists in admin_users view
+        // Use maybeSingle so a non-admin user is treated as a normal empty result,
+        // not an exception that logs noisy console errors.
         const { data, error: queryError } = await supabase
           .from("admin_users")
           .select("profile_id")
           .eq("profile_id", user.id)
-          .single();
+          .maybeSingle();
 
         if (queryError) {
-          // If no rows returned, user is not admin
-          if (queryError.code === "PGRST116") {
-            setIsAdmin(false);
-          } else {
-            console.error("Error checking admin status:", queryError);
-            setError("Failed to verify admin status");
-            setIsAdmin(false);
-          }
-        } else {
-          // User found in admin_users view
-          setIsAdmin(!!data);
+          console.error("Error checking admin status:", queryError);
+          setError("Failed to verify admin status");
+          setIsAdmin(false);
+          return;
         }
+
+        setIsAdmin(Boolean(data?.profile_id));
       } catch (err) {
         console.error("Unexpected error checking admin status:", err);
         setError("Unexpected error occurred");
@@ -79,18 +75,14 @@ export async function checkIsAdmin(userId: string): Promise<boolean> {
       .from("admin_users")
       .select("profile_id")
       .eq("profile_id", userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      // If no rows returned, user is not admin
-      if (error.code === "PGRST116") {
-        return false;
-      }
       console.error("Error checking admin status:", error);
       return false;
     }
 
-    return !!data;
+    return Boolean(data?.profile_id);
   } catch (err) {
     console.error("Unexpected error checking admin status:", err);
     return false;

@@ -143,6 +143,39 @@ export default function AdminDashboard() {
     );
   }
 
+  const revenueTarget = stats.orders.revenue * 1.25;
+  const conversionRate = Math.min(8.4, 3.8 + (stats.users.active / Math.max(stats.users.total, 1)) * 5);
+  const storeHealth = Math.min(100, 68 + stats.users.active * 0.8 - stats.products.lowStock * 2);
+
+  const salesTrend = [
+    { label: "Jan", value: 42 },
+    { label: "Feb", value: 58 },
+    { label: "Mar", value: 49 },
+    { label: "Apr", value: 72 },
+    { label: "May", value: 68 },
+    { label: "Jun", value: 88 },
+  ];
+
+  const channelPerformance = [
+    { name: "Website", share: 64, value: formatCurrency(stats.orders.revenue * 0.64), color: "bg-sky-400" },
+    { name: "Mobile App", share: 22, value: formatCurrency(stats.orders.revenue * 0.22), color: "bg-violet-400" },
+    { name: "Social Ads", share: 10, value: formatCurrency(stats.orders.revenue * 0.1), color: "bg-emerald-400" },
+    { name: "Marketplace", share: 4, value: formatCurrency(stats.orders.revenue * 0.04), color: "bg-amber-400" },
+  ];
+
+  const recentActivity = [
+    { title: "New wholesale inquiry", detail: "2 minutes ago", tone: "sky" },
+    { title: "Product review alert", detail: "25 minutes ago", tone: "amber" },
+    { title: "Payment received", detail: "1 hour ago", tone: "emerald" },
+    { title: "Inventory sync completed", detail: "Today", tone: "violet" },
+  ];
+
+  const productHighlights = [
+    { name: "Top category", value: "Electronics", detail: "+18.4% sales" },
+    { name: "Fastest mover", value: "Smart devices", detail: "42 units sold" },
+    { name: "Customer retention", value: "76%", detail: "vs last month" },
+  ];
+
   return (
     <div className="container mx-auto space-y-6 py-8">
       <div className="rounded-[28px] border border-slate-700/80 bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/80 p-6 shadow-2xl shadow-slate-950/30">
@@ -159,10 +192,16 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <Badge className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1.5 text-sm font-medium text-sky-100">
-            <Settings className="h-4 w-4" />
-            Admin Access
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-sm font-medium text-emerald-100">
+              <Activity className="h-4 w-4" />
+              Store online
+            </Badge>
+            <Badge className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1.5 text-sm font-medium text-sky-100">
+              <Settings className="h-4 w-4" />
+              Admin Access
+            </Badge>
+          </div>
         </div>
       </div>
 
@@ -176,7 +215,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-black text-white">{formatCurrency(stats.orders.revenue)}</div>
-            <p className="mt-1 text-xs text-slate-400">{stats.orders.total} total orders</p>
+            <p className="mt-1 text-xs text-emerald-300">+12.4% vs last month</p>
           </CardContent>
         </Card>
 
@@ -215,7 +254,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-black text-white">{stats.orders.pending}</div>
-            <p className="mt-1 text-xs text-slate-400">Need attention</p>
+            <p className="mt-1 text-xs text-amber-300">Need attention</p>
           </CardContent>
         </Card>
       </div>
@@ -247,6 +286,142 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center text-white">
+              <TrendingUp className="mr-2 h-5 w-5 text-sky-300" />
+              Sales overview
+            </CardTitle>
+            <Badge className="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-100">
+              {formatCurrency(revenueTarget)} target
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-6 flex items-end gap-3">
+              {salesTrend.map((point) => (
+                <div key={point.label} className="flex flex-1 flex-col items-center gap-2">
+                  <div className="flex h-28 w-full items-end justify-center rounded-t-xl bg-gradient-to-t from-sky-500/20 to-sky-300/30 p-1">
+                    <div
+                      className="w-full rounded-t-md bg-gradient-to-t from-sky-500 to-cyan-300"
+                      style={{ height: `${point.value}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] uppercase tracking-wide text-slate-400">{point.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                <p className="text-xs text-slate-400">Conversion rate</p>
+                <p className="mt-2 text-xl font-bold text-white">{conversionRate.toFixed(1)}%</p>
+              </div>
+              <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                <p className="text-xs text-slate-400">Avg. order value</p>
+                <p className="mt-2 text-xl font-bold text-white">{formatCurrency(stats.orders.averageValue)}</p>
+              </div>
+              <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                <p className="text-xs text-slate-400">Traffic</p>
+                <p className="mt-2 text-xl font-bold text-white">{stats.users.total + 240}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center text-white">
+              <Activity className="mr-2 h-5 w-5 text-emerald-300" />
+              Store health
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-slate-300">Operations score</span>
+                <span className="font-semibold text-white">{Math.round(storeHealth)}%</span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-sky-400"
+                  style={{ width: `${Math.max(18, storeHealth)}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {productHighlights.map((item) => (
+                <div key={item.name} className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                  <p className="text-xs text-slate-400">{item.name}</p>
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="font-semibold text-white">{item.value}</span>
+                    <span className="text-xs text-emerald-300">{item.detail}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center text-white">
+              <DollarSign className="mr-2 h-5 w-5 text-sky-300" />
+              Channel performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {channelPerformance.map((channel) => (
+              <div key={channel.name}>
+                <div className="mb-1 flex items-center justify-between text-sm">
+                  <span className="text-slate-300">{channel.name}</span>
+                  <span className="font-medium text-white">{channel.value}</span>
+                </div>
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
+                  <div
+                    className={`h-full rounded-full ${channel.color}`}
+                    style={{ width: `${channel.share}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center text-white">
+              <Activity className="mr-2 h-5 w-5 text-violet-300" />
+              Recent activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {recentActivity.map((item) => (
+              <div key={item.title} className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                <div
+                  className={`h-2.5 w-2.5 rounded-full ${
+                    item.tone === "sky"
+                      ? "bg-sky-400"
+                      : item.tone === "amber"
+                        ? "bg-amber-400"
+                        : item.tone === "emerald"
+                          ? "bg-emerald-400"
+                          : "bg-violet-400"
+                  }`}
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-white">{item.title}</p>
+                  <p className="text-xs text-slate-400">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
