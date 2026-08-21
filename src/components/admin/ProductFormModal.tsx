@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase/client";
 import {
   CreateProductData,
   ProductWithDetails,
@@ -60,7 +61,46 @@ export function ProductFormModal({
     category_id: "no-category",
   });
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const uploadProductImage = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split(".").pop() || "jpg";
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${fileExt}`;
+    const filePath = `products/${fileName}`;
+    const bucketNames = ["products", "images", "default", "public", "storage"];
+
+    let lastError: Error | null = null;
+
+    for (const bucketName of bucketNames) {
+      try {
+        const { data, error } = await supabase.storage
+          .from(bucketName)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (!error && data?.path) {
+          const { data: publicUrlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(data.path);
+
+          return publicUrlData?.publicUrl || null;
+        }
+
+        lastError = new Error(error?.message || `Failed to upload to ${bucketName}`);
+      } catch (error) {
+        lastError =
+          error instanceof Error
+            ? error
+            : new Error("Failed to upload product image");
+      }
+    }
+
+    console.error("Image upload failed:", lastError);
+    return null;
+  };
 
   // Use the query hook to fetch categories
   const {
@@ -163,6 +203,26 @@ export function ProductFormModal({
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadProductImage(file);
+      if (imageUrl) {
+        setFormData((prev) => ({ ...prev, image: imageUrl }));
+      } else {
+        console.error("Failed to upload product image");
+      }
+    } finally {
+      setUploadingImage(false);
+      event.target.value = "";
     }
   };
 
@@ -305,13 +365,52 @@ export function ProductFormModal({
           </div>
 
           <div>
-            <Label htmlFor="image">Image URL</Label>
-            <Input
-              id="image"
-              value={formData.image}
-              onChange={(e) => handleInputChange("image", e.target.value)}
-              placeholder="https://example.com/image.jpg"
-            />
+            <Label htmlFor="image">Product Image</Label>
+
+            <div className="mt-2 flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() =>
+                  document.getElementById("product-image-upload")?.click()
+                }
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? "Uploading..." : "Choose from device"}
+              </Button>
+
+              <input
+                id="product-image-upload"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageUpload}
+              />
+            </div>
+
+            <div className="mt-3">
+              <Label htmlFor="image-url">Or paste image URL</Label>
+              <Input
+                id="image-url"
+                value={formData.image}
+                onChange={(e) => handleInputChange("image", e.target.value)}
+                placeholder="https://example.com/product-image.jpg"
+              />
+            </div>
+
+            {formData.image.trim() && (
+              <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                <img
+                  src={formData.image}
+                  alt="Product preview"
+                  className="h-28 w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter>

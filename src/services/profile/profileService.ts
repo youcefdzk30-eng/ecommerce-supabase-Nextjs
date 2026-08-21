@@ -18,7 +18,7 @@ export const profileService = {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('profile_id', userId)
+        .eq('id', userId)
         .single();
 
       if (error) {

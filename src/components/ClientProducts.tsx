@@ -21,6 +21,11 @@ const getCategoryId = (categoryName: string): number | null => {
 };
 
 // Sort products based on the selected option
+const getProductTitle = (product: ProductType): string => {
+  const legacyName = (product as { name?: string } | undefined)?.name;
+  return product.title || legacyName || "Untitled Product";
+};
+
 const sortProducts = (
   products: ProductType[],
   sortBy: FilterOptions["sortBy"],
@@ -33,9 +38,13 @@ const sortProducts = (
     case "price-desc":
       return sorted.sort((a, b) => b.price - a.price);
     case "name-asc":
-      return sorted.sort((a, b) => a.title.localeCompare(b.title));
+      return sorted.sort((a, b) =>
+        getProductTitle(a).localeCompare(getProductTitle(b)),
+      );
     case "name-desc":
-      return sorted.sort((a, b) => b.title.localeCompare(a.title));
+      return sorted.sort((a, b) =>
+        getProductTitle(b).localeCompare(getProductTitle(a)),
+      );
     default:
       return sorted;
   }
@@ -92,13 +101,12 @@ export default function ClientProducts() {
 
     // Apply search filter
     if (searchTerm.trim() !== "") {
-      processed = processed.filter(
-        (product) =>
-          product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (product.description?.toLowerCase() || "").includes(
-            searchTerm.toLowerCase(),
-          ),
-      );
+      const normalizedSearch = searchTerm.toLowerCase();
+      processed = processed.filter((product) => {
+        const title = (getProductTitle(product) || "").toLowerCase();
+        const description = (product.description || "").toLowerCase();
+        return title.includes(normalizedSearch) || description.includes(normalizedSearch);
+      });
     }
 
     // Apply filters

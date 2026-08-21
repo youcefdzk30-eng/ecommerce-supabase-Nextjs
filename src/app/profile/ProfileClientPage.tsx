@@ -54,11 +54,11 @@ export default function ProfileClientPage({
       const { data: updatedProfile, error } = await supabase
         .from("profiles")
         .update({
-          username: usernameInput,
+          full_name: usernameInput,
           email: emailInput,
           avatar_url: avatarUrlInput,
         })
-        .eq("profile_id", user.id)
+        .eq("id", user.id)
         .select()
         .single();
 

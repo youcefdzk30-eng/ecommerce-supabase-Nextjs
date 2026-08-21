@@ -103,19 +103,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (!activeCartId) {
+    let cartId = activeCartId;
+    if (!cartId) {
       const cart = await cartService.createCart();
       if (!cart) {
         toast.error('Failed to create cart');
         return;
       }
-      setActiveCartId(cart.id);
+      cartId = cart.id;
+      setActiveCartId(cartId);
     }
 
     try {
       // Add item to database
       const result = await cartService.addItemToCart(
-        activeCartId as number,
+        cartId as number,
         product.product_id,
         product.price,
         1

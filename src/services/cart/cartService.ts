@@ -11,12 +11,13 @@ export async function getActiveCart() {
       return null;
     }
 
-    const { data, error } = await supabase
-      .from('carts')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const baseQuery = supabase.from('carts').select('*').eq('user_id', user.id);
+
+    let { data, error } = await baseQuery.eq('status', 'active').maybeSingle();
+
+    if (error && error.code === '42703') {
+      ({ data, error } = await baseQuery.maybeSingle());
+    }
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error fetching cart:', error);
@@ -40,22 +41,63 @@ export async function createCart() {
       throw new Error('User not authenticated');
     }
 
-    const { data, error } = await supabase
+    const { data: existingCart, error: existingCartError } = await supabase
       .from('carts')
-      .insert({
-        user_id: user.id,
-        status: 'active' as CartStatus,
-      })
       .select('*')
-      .single();
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (error) {
-      console.error('Error creating cart:', error);
-      toast.error('Failed to create cart');
-      return null;
+    if (existingCart && !existingCartError) {
+      return existingCart as CartType;
     }
 
-    return data as CartType;
+    if (existingCartError && existingCartError.code !== 'PGRST116') {
+      console.error('Error checking existing cart:', existingCartError);
+    }
+
+    const payload: { user_id: string; status?: CartStatus } = {
+      user_id: user.id,
+    };
+
+    const insertCandidates = [
+      { ...payload, status: 'active' as CartStatus },
+      { user_id: user.id },
+    ];
+
+    for (const item of insertCandidates) {
+      const { data, error } = await supabase
+        .from('carts')
+        .insert(item)
+        .select('*')
+        .maybeSingle();
+
+      if (!error) {
+        return data as CartType;
+      }
+
+      if (error.code === '23505') {
+        const { data: duplicateCart } = await supabase
+          .from('carts')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (duplicateCart) {
+          return duplicateCart as CartType;
+        }
+      }
+
+      if (error.code !== '42703' && error.code !== '42P01') {
+        console.error('Error creating cart:', error);
+      }
+    }
+
+    toast.error('Failed to create cart');
+    return null;
   } catch (error) {
     console.error('Error in createCart:', error);
     toast.error('Something went wrong');

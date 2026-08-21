@@ -62,12 +62,16 @@ export function useSupabaseAuth() {
         }
       }
 
-      // Check if user profile exists
-      const { data: existingProfile } = await supabase
+      // Check if user profile exists using the canonical `id` column
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
-        .select('profile_id, email')
-        .eq('profile_id', user.id)
-        .single();
+        .select('id, email')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error checking user profile:', fetchError);
+      }
 
       if (existingProfile) {
         // Profile already exists, update email if needed
@@ -80,15 +84,19 @@ export function useSupabaseAuth() {
         return;
       }
 
-      // Create profile directly with Supabase
+      // Create profile using the actual schema columns on the table.
       const { error: createError } = await supabase
         .from('profiles')
         .insert({
-          profile_id: user.id,
-          username: '',
-          avatar_url: '',
+          id: user.id,
           email: userEmail,
-          created_at: new Date().toISOString(),
+          full_name:
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            userEmail.split('@')[0] ||
+            '',
+          avatar_url: user.user_metadata?.avatar_url || '',
+          role: 'customer',
         })
         .select()
         .single();

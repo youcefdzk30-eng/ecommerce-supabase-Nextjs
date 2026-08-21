@@ -94,12 +94,19 @@ export default function AdminProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredProducts = products.filter((product) => {
+    const productName = (product as { name?: string }).name;
+    const title = (product.title || productName || "Untitled Product").toLowerCase();
+    const description = (product.description || "").toLowerCase();
+    const sku = (product.sku || "").toLowerCase();
+    const normalizedSearch = searchTerm.toLowerCase();
+
+    return (
+      title.includes(normalizedSearch) ||
+      description.includes(normalizedSearch) ||
+      sku.includes(normalizedSearch)
+    );
+  });
 
   if (loading) {
     return (

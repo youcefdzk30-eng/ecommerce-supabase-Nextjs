@@ -28,6 +28,34 @@ export interface ProductWithDetails extends ProductType {
  * Admin service for product management
  * Requires admin privileges for all operations
  */
+const buildProductPayload = (productData: Partial<CreateProductData> | UpdateProductData) => ({
+  ...productData,
+  title: productData.title,
+  name: productData.title ?? (productData as any).name,
+  image: productData.image,
+  image_url: productData.image,
+  updated_at: new Date().toISOString(),
+});
+
+const runReviewsQuery = async (product: any) => {
+  const reviewCandidateFields: Array<"product_id" | "id"> = ["product_id", "id"];
+
+  for (const field of reviewCandidateFields) {
+    const productId = product?.[field] ?? product?.product_id ?? product?.id;
+    if (!productId) continue;
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("rating")
+      .eq(field === "id" ? "product_id" : "product_id", productId);
+
+    if (!error) return data || [];
+    if (error.code !== "42703") break;
+  }
+
+  return [];
+};
+
 export const adminProductService = {
   /**
    * Get all products with additional details for admin view
@@ -52,19 +80,13 @@ export const adminProductService = {
         throw error;
       }
 
-      // Get review statistics for each product
       const productsWithStats = await Promise.all(
         (data || []).map(async (product) => {
-          const { data: reviewStats } = await supabase
-            .from("reviews")
-            .select("rating")
-            .eq("product_id", product.product_id);
-
-          const reviews = reviewStats || [];
-          const totalReviews = reviews.length;
+          const reviewStats = await runReviewsQuery(product);
+          const totalReviews = reviewStats.length;
           const averageRating =
             totalReviews > 0
-              ? reviews.reduce((sum, review) => sum + review.rating, 0) /
+              ? reviewStats.reduce((sum, review) => sum + review.rating, 0) /
                 totalReviews
               : 0;
 
@@ -89,17 +111,46 @@ export const adminProductService = {
    */
   async createProduct(productData: CreateProductData): Promise<ProductType> {
     try {
+      const payload = {
+        ...productData,
+        title: productData.title,
+        name: productData.title,
+        image: productData.image,
+        image_url: productData.image,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from("products")
-        .insert({
-          ...productData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        .insert(payload)
         .select()
         .single();
 
       if (error) {
+        if (error.code === "42703" || error.code === "42P01") {
+          const fallbackPayload = {
+            ...productData,
+            name: productData.title,
+            image_url: productData.image,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          const fallbackResult = await supabase
+            .from("products")
+            .insert(fallbackPayload)
+            .select()
+            .single();
+
+          if (fallbackResult.error) {
+            console.error("Error creating product with fallback payload:", fallbackResult.error);
+            throw fallbackResult.error;
+          }
+
+          return fallbackResult.data;
+        }
+
         console.error("Error creating product:", error);
         throw error;
       }
@@ -119,22 +170,24 @@ export const adminProductService = {
     productData: UpdateProductData,
   ): Promise<ProductType> {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .update({
-          ...productData,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("product_id", productId)
-        .select()
-        .single();
+      const payload = buildProductPayload(productData);
+      const attempts: Array<"product_id" | "id"> = ["product_id", "id"];
 
-      if (error) {
-        console.error("Error updating product:", error);
-        throw error;
+      for (const field of attempts) {
+        const { data, error } = await supabase
+          .from("products")
+          .update(payload)
+          .eq(field, productId)
+          .select()
+          .single();
+
+        if (!error) return data;
+        if (error.code !== "42703" && error.code !== "42P01") {
+          throw error;
+        }
       }
 
-      return data;
+      throw new Error("Failed to update product: product identifier not found");
     } catch (err) {
       console.error("Failed to update product:", err);
       throw err;
@@ -146,17 +199,21 @@ export const adminProductService = {
    */
   async deleteProduct(productId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("product_id", productId);
+      const attempts: Array<"product_id" | "id"> = ["product_id", "id"];
 
-      if (error) {
-        console.error("Error deleting product:", error);
-        throw error;
+      for (const field of attempts) {
+        const { error } = await supabase
+          .from("products")
+          .delete()
+          .eq(field, productId);
+
+        if (!error) return true;
+        if (error.code !== "42703" && error.code !== "42P01") {
+          throw error;
+        }
       }
 
-      return true;
+      return false;
     } catch (err) {
       console.error("Failed to delete product:", err);
       throw err;
@@ -168,22 +225,28 @@ export const adminProductService = {
    */
   async updateStock(productId: string, newStock: number): Promise<ProductType> {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .update({
-          stock: newStock,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("product_id", productId)
-        .select()
-        .single();
+      const payload = {
+        stock: newStock,
+        updated_at: new Date().toISOString(),
+      };
 
-      if (error) {
-        console.error("Error updating product stock:", error);
-        throw error;
+      const attempts: Array<"product_id" | "id"> = ["product_id", "id"];
+
+      for (const field of attempts) {
+        const { data, error } = await supabase
+          .from("products")
+          .update(payload)
+          .eq(field, productId)
+          .select()
+          .single();
+
+        if (!error) return data;
+        if (error.code !== "42703" && error.code !== "42P01") {
+          throw error;
+        }
       }
 
-      return data;
+      throw new Error("Failed to update product stock: product identifier not found");
     } catch (err) {
       console.error("Failed to update product stock:", err);
       throw err;

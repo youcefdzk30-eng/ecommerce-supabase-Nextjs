@@ -59,13 +59,13 @@ export async function createPolarCheckout() {
 		// Get Supabase client
 		const supabase = await createServerSupabase()
 
-		// Get active cart
-		const { data: cart, error: cartError } = await supabase
-			.from('carts')
-			.select('*')
-			.eq('user_id', user.id)
-			.eq('status', 'active')
-			.single()
+		// Get active cart. Some DB setups omit the status column, so fall back gracefully.
+		let cartQuery = supabase.from('carts').select('*').eq('user_id', user.id)
+		let { data: cart, error: cartError } = await cartQuery.eq('status', 'active').maybeSingle()
+
+		if (cartError && cartError.code === '42703') {
+			;({ data: cart, error: cartError } = await cartQuery.maybeSingle())
+		}
 
 		if (cartError || !cart) {
 			throw new Error('No active cart found')

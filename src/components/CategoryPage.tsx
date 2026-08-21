@@ -39,13 +39,13 @@ export default function CategoryPage({
 			return products
 		}
 
-		return products.filter(
-			(product) =>
-				product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				(product.description?.toLowerCase() || '').includes(
-					searchTerm.toLowerCase()
-				)
-		)
+		const normalizedSearch = searchTerm.toLowerCase();
+		return products.filter((product) => {
+			const legacyName = (product as { name?: string } | undefined)?.name;
+			const title = (product.title || legacyName || 'Untitled Product').toLowerCase();
+			const description = (product.description || '').toLowerCase();
+			return title.includes(normalizedSearch) || description.includes(normalizedSearch);
+		})
 	}, [searchTerm, products])
 
 	// Client-side authentication check (backup)

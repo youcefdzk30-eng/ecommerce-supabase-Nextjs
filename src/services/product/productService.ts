@@ -2,6 +2,43 @@ import { supabase } from '@/lib/supabase/client';
 import { ProductType } from '../../types';
 import { isNoRowsError } from '@/utils/errorHandling';
 
+const legacyCategoryMap: Record<string, number> = {
+  electronics: 3,
+  clothing: 1,
+  accessories: 2,
+  'home-decor': 4,
+};
+
+const normalizeProduct = (product: any): ProductType => {
+  const rawCategoryId = product?.category_id;
+  const categoryName = product?.category?.slug || product?.category?.name || '';
+  const mappedCategoryId =
+    typeof rawCategoryId === 'number'
+      ? rawCategoryId
+      : legacyCategoryMap[categoryName] ?? 0;
+
+  return {
+    product_id: product?.product_id || product?.id || product?.slug || 'unknown',
+    title: product?.title || product?.name || product?.product_name || 'Untitled Product',
+    description:
+      product?.description ||
+      product?.short_description ||
+      product?.details ||
+      'No description available.',
+    price: Number(product?.price ?? 0),
+    stock: Number(product?.stock ?? 0),
+    category_id: mappedCategoryId,
+    image:
+      product?.image ||
+      product?.image_url ||
+      (Array.isArray(product?.images) ? product.images[0] : undefined) ||
+      '',
+    sku: product?.sku || product?.slug || '',
+    created_at: product?.created_at,
+    updated_at: product?.updated_at,
+  };
+};
+
 const fallbackProducts: ProductType[] = [
   {
     product_id: 'dmt-1',
@@ -85,7 +122,7 @@ export const productService = {
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(*)')
-        .order('title');
+        .order('name', { ascending: true });
 
       if (error) {
         console.warn('Falling back to demo products because Supabase query failed:', error.message);
@@ -96,7 +133,7 @@ export const productService = {
         return getFallbackProducts();
       }
 
-      return data as ProductType[];
+      return data.map(normalizeProduct);
     } catch (error) {
       console.warn('Falling back to demo products after product fetch error:', error);
       return getFallbackProducts();
@@ -108,8 +145,8 @@ export const productService = {
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(*)')
-        .eq('product_id', id)
-        .single();
+        .eq('id', id)
+        .maybeSingle();
 
       if (error) {
         if (isNoRowsError(error)) {
@@ -119,7 +156,11 @@ export const productService = {
         return getFallbackProducts().find((product) => product.product_id === id) ?? null;
       }
 
-      return data as ProductType;
+      if (!data) {
+        return getFallbackProducts().find((product) => product.product_id === id) ?? null;
+      }
+
+      return normalizeProduct(data);
     } catch (error) {
       console.warn('Using demo fallback for product lookup after error:', error);
       return getFallbackProducts().find((product) => product.product_id === id) ?? null;
@@ -130,9 +171,7 @@ export const productService = {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('*, category:categories(*)')
-        .eq('category_id', categoryId)
-        .order('title');
+        .select('*, category:categories(*)');
 
       if (error) {
         console.warn('Falling back to demo category products:', error.message);
@@ -143,7 +182,8 @@ export const productService = {
         return getFallbackProducts().filter((product) => product.category_id === categoryId);
       }
 
-      return data as ProductType[];
+      const normalized = data.map(normalizeProduct);
+      return normalized.filter((product) => product.category_id === categoryId);
     } catch (error) {
       console.warn('Fallback category products used after fetch error:', error);
       return getFallbackProducts().filter((product) => product.category_id === categoryId);

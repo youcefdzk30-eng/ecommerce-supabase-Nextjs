@@ -25,7 +25,7 @@ export const getCurrentUser = async (): Promise<ProfileType | null> => {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("*")
-      .eq("profile_id", user.id)
+      .eq("id", user.id)
       .single();
 
     if (profileError || !profile) {
