@@ -127,10 +127,8 @@ export default function Sidebar() {
             animate={isCollapsed ? "closed" : "open"}
             className="flex items-center space-x-2.5"
           >
-            <div className="from-primary to-primary/80 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg">
-              <span className="text-primary-foreground text-base font-bold">
-                E
-              </span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-slate-300 text-base font-black text-white shadow-lg shadow-blue-500/25">
+              D
             </div>
             {!isCollapsed && (
               <Motion
@@ -140,10 +138,10 @@ export default function Sidebar() {
                 className="flex flex-col"
               >
                 <span className="text-foreground text-base font-semibold">
-                  E-Store
+                  DMT STORE
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  Premium Shop
+                  Premium Market
                 </span>
               </Motion>
             )}
@@ -386,38 +384,43 @@ export default function Sidebar() {
             <DropdownMenuTrigger
               render={
                 !isCollapsed ? (
-                  <Motion
-                    variants={contentVariants}
-                    initial={isCollapsed ? "closed" : "open"}
-                    animate={isCollapsed ? "closed" : "open"}
-                    className="bg-background/60 hover:bg-background/80 group border-border/30 flex cursor-pointer items-center rounded-xl border p-3 shadow-sm transition-all duration-200"
+                  <button
+                    type="button"
+                    className="bg-background/60 hover:bg-background/80 group border-border/30 flex cursor-pointer items-center rounded-xl border p-3 text-left shadow-sm transition-all duration-200"
                   >
-                    <Avatar className="ring-primary/20 h-9 w-9 ring-2">
-                      <AvatarFallback className="from-primary to-primary/80 text-primary-foreground bg-gradient-to-br font-semibold">
-                        {user.email?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="ml-3 min-w-0 flex-1">
-                      <p className="text-foreground truncate text-sm font-medium">
-                        {user.email?.split("@")[0] || "User"}
-                      </p>
-                      <p className="text-muted-foreground truncate text-xs">
-                        {user.email}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className="h-2 w-2 rounded-full bg-green-500"
-                        title="Online"
-                      />
-                      <ChevronRight className="text-muted-foreground group-hover:text-foreground h-4 w-4 transition-colors duration-200" />
-                    </div>
-                  </Motion>
+                    <Motion
+                      variants={contentVariants}
+                      initial={isCollapsed ? "closed" : "open"}
+                      animate={isCollapsed ? "closed" : "open"}
+                      className="flex w-full items-center"
+                    >
+                      <Avatar className="ring-primary/20 h-9 w-9 ring-2">
+                        <AvatarFallback className="from-primary to-primary/80 text-primary-foreground bg-gradient-to-br font-semibold">
+                          {user.email?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="ml-3 min-w-0 flex-1">
+                        <p className="text-foreground truncate text-sm font-medium">
+                          {user.email?.split("@")[0] || "User"}
+                        </p>
+                        <p className="text-muted-foreground truncate text-xs">
+                          {user.email}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className="h-2 w-2 rounded-full bg-green-500"
+                          title="Online"
+                        />
+                        <ChevronRight className="text-muted-foreground group-hover:text-foreground h-4 w-4 transition-colors duration-200" />
+                      </div>
+                    </Motion>
+                  </button>
                 ) : (
-                  <SidebarMenuButton
-                    size="lg"
-                    className="group cursor-pointer"
-                    tooltip={`${user.email?.split("@")[0] || "User"}`}
+                  <button
+                    type="button"
+                    className="bg-background/60 hover:bg-background/80 border-border/30 group flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border shadow-sm transition-all duration-200"
+                    aria-label={user.email?.split("@")[0] || "User account"}
                   >
                     <div className="relative">
                       <Avatar className="ring-primary/20 group-hover:ring-primary/40 h-8 w-8 ring-2 transition-all duration-200">
@@ -427,7 +430,7 @@ export default function Sidebar() {
                       </Avatar>
                       <div className="border-background absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 bg-green-500" />
                     </div>
-                  </SidebarMenuButton>
+                  </button>
                 )
               }
             />

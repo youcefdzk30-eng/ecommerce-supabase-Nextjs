@@ -17,8 +17,16 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "E-Commerce",
-  description: "E-Commerce App",
+  title: "DMT STORE | Premium E-Commerce",
+  description: "DMT STORE offers premium fashion, electronics, and accessories with a secure shopping experience.",
+  metadataBase: new URL("https://dmtstore.example.com"),
+  applicationName: "DMT STORE",
+  keywords: ["DMT STORE", "online shopping", "premium ecommerce", "electronics", "fashion"],
+  openGraph: {
+    title: "DMT STORE",
+    description: "Premium products with a secure modern shopping experience.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -30,8 +38,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        <title>My App</title>
-        <meta name="description" content="My App is a..." />
+        <meta name="theme-color" content="#0b1020" />
+        <meta name="robots" content="index,follow" />
       </head>
       <body className="bg-background min-h-screen">
         <ErrorBoundary>

@@ -113,32 +113,56 @@ export default function ClientProducts() {
   return (
     <ErrorBoundary>
       <>
-        {/* Search Input */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="mb-6 rounded-[26px] border border-slate-700/80 bg-slate-900/70 p-5 shadow-xl shadow-slate-950/25 backdrop-blur-sm"
+        >
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">
+                Curated collection
+              </span>
+              <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+                Best sellers and daily essentials
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm text-slate-300">
+              <div className="rounded-full border border-slate-600 bg-slate-800/80 px-3 py-1.5">
+                {products?.length || 0} products
+              </div>
+              <div className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1.5 text-blue-200">
+                New arrivals
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mx-auto w-full max-w-md"
+          className="mx-auto w-full max-w-xl"
         >
           <Input
             type="text"
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
+            className="w-full rounded-2xl border-slate-700 bg-slate-900/70 text-white placeholder:text-slate-400"
           />
         </motion.div>
 
-        {/* Product Filter */}
         <ProductFilter filters={filters} onFilterChange={setFilters} />
 
-        {/* Product Count and Reset */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-muted/50 flex flex-col items-center justify-between gap-4 rounded-lg p-4 sm:flex-row"
+          className="bg-slate-900/60 flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-700/80 p-4 sm:flex-row"
         >
-          <div className="text-muted-foreground flex items-center gap-2 text-sm">
+          <div className="text-slate-300 flex items-center gap-2 text-sm">
             <span>
               Showing {processedProducts.length} of {products?.length || 0}{" "}
               products
@@ -159,7 +183,7 @@ export default function ClientProducts() {
                 });
                 setSearchTerm("");
               }}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded px-3 py-1 text-xs transition-colors"
+              className="rounded-full bg-gradient-to-r from-sky-500 to-blue-500 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:brightness-110"
             >
               Reset All Filters
             </button>
@@ -242,7 +266,7 @@ export default function ClientProducts() {
             ) : (
               <motion.div
                 key="products"
-                className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

@@ -145,97 +145,101 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto space-y-6 py-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user?.email}</p>
-        </div>
-        <Badge variant="secondary" className="bg-primary/15 text-primary">
-          <Settings className="mr-1 h-3 w-3" />
-          Admin
-        </Badge>
-      </div>
-
-      {/* Overview Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(stats.orders.revenue)}
+      <div className="rounded-[28px] border border-slate-700/80 bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/80 p-6 shadow-2xl shadow-slate-950/30">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-200">
+              DMT STORE ADMIN
             </div>
-            <p className="text-muted-foreground text-xs">
-              {stats.orders.total} total orders
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Dashboard overview
+            </h1>
+            <p className="mt-2 text-sm text-slate-300">
+              Welcome back, {user?.email ?? "Administrator"}
             </p>
+          </div>
+
+          <Badge className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1.5 text-sm font-medium text-sky-100">
+            <Settings className="h-4 w-4" />
+            Admin Access
+          </Badge>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-slate-300">Total Revenue</CardTitle>
+            <div className="rounded-xl bg-sky-500/10 p-2 text-sky-300">
+              <DollarSign className="h-4 w-4" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-black text-white">{formatCurrency(stats.orders.revenue)}</div>
+            <p className="mt-1 text-xs text-slate-400">{stats.orders.total} total orders</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Products
-            </CardTitle>
-            <Package className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-slate-300">Total Products</CardTitle>
+            <div className="rounded-xl bg-blue-500/10 p-2 text-blue-300">
+              <Package className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.products.total}</div>
-            <p className="text-muted-foreground text-xs">
-              {stats.products.lowStock} low stock
-            </p>
+            <div className="text-2xl font-black text-white">{stats.products.total}</div>
+            <p className="mt-1 text-xs text-slate-400">{stats.products.lowStock} low stock</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-slate-300">Total Users</CardTitle>
+            <div className="rounded-xl bg-cyan-500/10 p-2 text-cyan-300">
+              <Users className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.users.total}</div>
-            <p className="text-muted-foreground text-xs">
-              {stats.users.active} active this month
-            </p>
+            <div className="text-2xl font-black text-white">{stats.users.total}</div>
+            <p className="mt-1 text-xs text-slate-400">{stats.users.active} active this month</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Orders
-            </CardTitle>
-            <ShoppingCart className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-slate-300">Pending Orders</CardTitle>
+            <div className="rounded-xl bg-amber-500/10 p-2 text-amber-300">
+              <ShoppingCart className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.orders.pending}</div>
-            <p className="text-muted-foreground text-xs">Need attention</p>
+            <div className="text-2xl font-black text-white">{stats.orders.pending}</div>
+            <p className="mt-1 text-xs text-slate-400">Need attention</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
+      <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="text-lg font-bold text-white">Quick actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Link href="/admin/products">
-              <Button className="w-full cursor-pointer" variant="outline">
+              <Button className="w-full cursor-pointer rounded-2xl border border-sky-400/30 bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-900/20 hover:brightness-110" variant="outline">
                 <Package className="mr-2 h-4 w-4" />
                 Manage Products
               </Button>
             </Link>
             <Link href="/admin/orders">
-              <Button className="w-full cursor-pointer" variant="outline">
+              <Button className="w-full cursor-pointer rounded-2xl border border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700" variant="outline">
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Manage Orders
               </Button>
             </Link>
             <Link href="/admin/users">
-              <Button className="w-full cursor-pointer" variant="outline">
+              <Button className="w-full cursor-pointer rounded-2xl border border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700" variant="outline">
                 <Users className="mr-2 h-4 w-4" />
                 Manage Users
               </Button>
@@ -244,91 +248,68 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
-      {/* Detailed Analytics */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5" />
-              Key Metrics
+            <CardTitle className="flex items-center text-white">
+              <TrendingUp className="mr-2 h-5 w-5 text-sky-300" />
+              Key metrics
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">
-                Average Order Value
-              </span>
-              <span className="font-medium">
-                {formatCurrency(stats.orders.averageValue)}
-              </span>
+            <div className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+              <span className="text-sm text-slate-300">Average Order Value</span>
+              <span className="font-semibold text-white">{formatCurrency(stats.orders.averageValue)}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">
-                Inventory Value
-              </span>
-              <span className="font-medium">
-                {formatCurrency(stats.products.totalValue)}
-              </span>
+            <div className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+              <span className="text-sm text-slate-300">Inventory Value</span>
+              <span className="font-semibold text-white">{formatCurrency(stats.products.totalValue)}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">
-                New Users This Month
-              </span>
-              <span className="font-medium">{stats.users.newThisMonth}</span>
+            <div className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+              <span className="text-sm text-slate-300">New Users This Month</span>
+              <span className="font-semibold text-white">{stats.users.newThisMonth}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">Admin Users</span>
-              <span className="font-medium">{stats.users.admins}</span>
+            <div className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+              <span className="text-sm text-slate-300">Admin Users</span>
+              <span className="font-semibold text-white">{stats.users.admins}</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-700/80 bg-slate-900/70 text-white shadow-lg shadow-slate-950/20">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertTriangle className="mr-2 h-5 w-5" />
-              Alerts & Notifications
+            <CardTitle className="flex items-center text-white">
+              <AlertTriangle className="mr-2 h-5 w-5 text-amber-300" />
+              Alerts & notifications
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {stats.products.lowStock > 0 && (
-              <div className="flex items-center rounded-lg border border-yellow-200 bg-yellow-50 p-3">
-                <AlertTriangle className="mr-2 h-4 w-4 text-yellow-600" />
+              <div className="flex items-center rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
+                <AlertTriangle className="mr-2 h-4 w-4 text-amber-300" />
                 <div>
-                  <p className="text-sm font-medium text-yellow-800">
-                    Low Stock Alert
-                  </p>
-                  <p className="text-xs text-yellow-600">
-                    {stats.products.lowStock} products are running low on stock
-                  </p>
+                  <p className="text-sm font-medium text-amber-200">Low Stock Alert</p>
+                  <p className="text-xs text-amber-100/80">{stats.products.lowStock} products are running low on stock</p>
                 </div>
               </div>
             )}
 
             {stats.orders.pending > 0 && (
-              <div className="border-primary/30 bg-primary/10 flex items-center rounded-lg border p-3">
-                <Activity className="text-primary mr-2 h-4 w-4" />
+              <div className="flex items-center rounded-xl border border-sky-500/30 bg-sky-500/10 p-3">
+                <Activity className="mr-2 h-4 w-4 text-sky-300" />
                 <div>
-                  <p className="text-primary text-sm font-medium">
-                    Pending Orders
-                  </p>
-                  <p className="text-primary text-xs">
-                    {stats.orders.pending} orders are waiting for processing
-                  </p>
+                  <p className="text-sm font-medium text-sky-200">Pending Orders</p>
+                  <p className="text-xs text-sky-100/80">{stats.orders.pending} orders are waiting for processing</p>
                 </div>
               </div>
             )}
 
             {stats.products.lowStock === 0 && stats.orders.pending === 0 && (
-              <div className="flex items-center rounded-lg border border-green-200 bg-green-50 p-3">
-                <Activity className="mr-2 h-4 w-4 text-green-600" />
+              <div className="flex items-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+                <Activity className="mr-2 h-4 w-4 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-medium text-green-800">
-                    All Clear
-                  </p>
-                  <p className="text-xs text-green-600">
-                    No immediate attention required
-                  </p>
+                  <p className="text-sm font-medium text-emerald-200">All Clear</p>
+                  <p className="text-xs text-emerald-100/80">No immediate attention required</p>
                 </div>
               </div>
             )}

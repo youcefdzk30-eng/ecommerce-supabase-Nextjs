@@ -22,6 +22,8 @@ export async function updateSession(request: NextRequest) {
               name,
               value,
               ...options,
+              secure: process.env.NODE_ENV === 'production' ? true : options?.secure,
+              sameSite: options?.sameSite ?? 'lax',
             });
           });
         },
@@ -33,14 +35,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect routes that require authentication
   const protectedPaths = ['/profile', '/checkout', '/cart'];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
 
   if (isProtectedPath && !user) {
-    // Store the original URL to redirect back after login
     const returnTo = encodeURIComponent(request.nextUrl.pathname);
     return NextResponse.redirect(
       new URL(`/signin?returnTo=${returnTo}`, request.url)
