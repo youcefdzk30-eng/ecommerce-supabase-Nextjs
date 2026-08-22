@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import ClientProducts from "@/components/ClientProducts";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Link from "next/link";
 import { ArrowRight, ShieldCheck, Truck, Sparkles, Star } from "lucide-react";
 
 const highlights = [
@@ -14,6 +15,27 @@ const categories = [
   "Clothing",
   "Accessories",
   "New Collections",
+];
+
+const featureCollections = [
+  {
+    name: "Audio & Tech",
+    description: "Premium sound, smart gear, and everyday productivity upgrades.",
+    accent: "from-sky-500/25 to-blue-600/10",
+    cta: "Shop gadgets",
+  },
+  {
+    name: "Style Essentials",
+    description: "Clean silhouettes and elevated basics built for modern routines.",
+    accent: "from-violet-500/25 to-fuchsia-600/10",
+    cta: "View fashion",
+  },
+  {
+    name: "Travel Picks",
+    description: "Compact, useful accessories to keep your setup organized and ready.",
+    accent: "from-cyan-500/25 to-emerald-500/10",
+    cta: "Explore accessories",
+  },
 ];
 
 export default function Home() {
@@ -120,6 +142,33 @@ export default function Home() {
               >
                 {category}
               </span>
+            ))}
+          </section>
+
+          <section className="mt-8 grid gap-4 md:grid-cols-3">
+            {featureCollections.map((collection) => (
+              <Link
+                key={collection.name}
+                href="#products"
+                className={`group block rounded-[28px] border border-white/10 bg-gradient-to-br ${collection.accent} p-[1px] shadow-xl shadow-slate-950/20 transition hover:-translate-y-1`}
+              >
+                <div className="flex h-full flex-col justify-between rounded-[27px] bg-slate-950/85 p-5">
+                  <div>
+                    <div className="mb-3 inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                      Featured
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">{collection.name}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-300">
+                      {collection.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-300">
+                    {collection.cta}
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </Link>
             ))}
           </section>
 

@@ -6,7 +6,7 @@ import { ProductType } from "@/types";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { Star, Heart, ShoppingCart, Eye, Badge, Zap } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 interface ProductCardProps {
@@ -19,6 +19,17 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  useEffect(() => {
+    try {
+      const savedWishlist = JSON.parse(
+        localStorage.getItem("dmt-store-wishlist") || "[]",
+      ) as string[];
+      setIsWishlisted(savedWishlist.includes(String(product.product_id)));
+    } catch {
+      setIsWishlisted(false);
+    }
+  }, [product.product_id]);
+
   const handleProductClick = () => {
     router.push(`/products/${product.product_id}`);
   };
@@ -30,7 +41,25 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    setIsWishlisted((prev) => {
+      const nextValue = !prev;
+      try {
+        const savedWishlist = JSON.parse(
+          localStorage.getItem("dmt-store-wishlist") || "[]",
+        ) as string[];
+        const productId = String(product.product_id);
+        const updatedWishlist = nextValue
+          ? [...new Set([...savedWishlist, productId])]
+          : savedWishlist.filter((id) => id !== productId);
+        localStorage.setItem(
+          "dmt-store-wishlist",
+          JSON.stringify(updatedWishlist),
+        );
+      } catch {
+        // Ignore storage issues gracefully.
+      }
+      return nextValue;
+    });
   };
 
   const handleQuickView = (e: React.MouseEvent) => {
