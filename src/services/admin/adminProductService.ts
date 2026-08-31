@@ -5,7 +5,10 @@ export interface CreateProductData {
   title: string;
   description: string;
   price: number;
+  price_before?: number;
   image?: string;
+  images?: string[];
+  colors?: string[];
   stock: number;
   sku?: string;
   category_id?: number;
@@ -33,7 +36,10 @@ const buildProductPayload = (productData: Partial<CreateProductData> | UpdatePro
     ...(productData.title !== undefined ? { title: productData.title } : {}),
     ...(productData.description !== undefined ? { description: productData.description } : {}),
     ...(productData.price !== undefined ? { price: productData.price } : {}),
+    ...(productData.price_before !== undefined ? { price_before: productData.price_before } : {}),
     ...(productData.image !== undefined ? { image: productData.image } : {}),
+    ...(productData.images !== undefined ? { images: productData.images } : {}),
+    ...(productData.colors !== undefined ? { colors: productData.colors } : {}),
     ...(productData.stock !== undefined ? { stock: productData.stock } : {}),
     ...(productData.sku !== undefined ? { sku: productData.sku } : {}),
     ...(productData.category_id !== undefined ? { category_id: productData.category_id } : {}),
@@ -121,7 +127,10 @@ export const adminProductService = {
         title: productData.title,
         description: productData.description,
         price: productData.price,
+        ...(productData.price_before !== undefined ? { price_before: productData.price_before } : {}),
         ...(productData.image ? { image: productData.image } : {}),
+        ...(productData.images && productData.images.length > 0 ? { images: productData.images } : {}),
+        ...(productData.colors && productData.colors.length > 0 ? { colors: productData.colors } : {}),
         stock: productData.stock,
         ...(productData.sku ? { sku: productData.sku } : {}),
         ...(productData.category_id !== undefined ? { category_id: productData.category_id } : {}),

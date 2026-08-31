@@ -122,7 +122,7 @@ export const productService = {
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(*)')
-        .order('name', { ascending: true });
+        .order('title', { ascending: true });
 
       if (error) {
         console.warn('Falling back to demo products because Supabase query failed:', error.message);
@@ -145,7 +145,7 @@ export const productService = {
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(*)')
-        .eq('id', id)
+        .eq('product_id', id)
         .maybeSingle();
 
       if (error) {
@@ -171,7 +171,8 @@ export const productService = {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('*, category:categories(*)');
+        .select('*, category:categories(*)')
+        .eq('category_id', categoryId);
 
       if (error) {
         console.warn('Falling back to demo category products:', error.message);

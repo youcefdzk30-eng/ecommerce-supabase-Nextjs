@@ -112,6 +112,7 @@ export default function Sidebar() {
   const adminNavItems = [
     { name: "Admin Dashboard", icon: Settings, href: "/admin" },
     { name: "Products", icon: Package, href: "/admin/products" },
+    { name: "Categories", icon: Home, href: "/admin/categories" },
     { name: "Orders", icon: ShoppingCart, href: "/admin/orders" },
     { name: "Users", icon: Users, href: "/admin/users" },
   ];

@@ -46,7 +46,9 @@ const nextConfig = {
   // Ensure Turbopack uses the project folder as the workspace root to avoid
   // picking a parent folder that contains another lockfile.
   turbopack: {
-    root: "E:/projects/try get hub store/ecommerce-supabase-Nextjs",
+    // Use the current project working directory so Turbopack doesn't resolve
+    // a root outside this worktree (which causes distDirRoot errors).
+    root: process.cwd(),
   },
   images: {
     remotePatterns: [

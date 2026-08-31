@@ -38,7 +38,10 @@ interface FormData {
   title: string;
   description: string;
   price: string;
+  price_before: string;
   image: string;
+  images: string;
+  colors: string;
   stock: string;
   sku: string;
   category_id: string;
@@ -55,7 +58,10 @@ export function ProductFormModal({
     title: "",
     description: "",
     price: "",
+    price_before: "",
     image: "",
+    images: "",
+    colors: "",
     stock: "",
     sku: "",
     category_id: "no-category",
@@ -116,7 +122,10 @@ export function ProductFormModal({
         title: product.title || "",
         description: product.description || "",
         price: product.price?.toString() || "",
+        price_before: product.price_before?.toString() || "",
         image: product.image || "",
+        images: (product.images || []).join("\n"),
+        colors: (product.colors || []).join(", "),
         stock: product.stock?.toString() || "",
         sku: product.sku || "",
         category_id: product.category_id?.toString() || "no-category",
@@ -126,7 +135,10 @@ export function ProductFormModal({
         title: "",
         description: "",
         price: "",
+        price_before: "",
         image: "",
+        images: "",
+        colors: "",
         stock: "",
         sku: "",
         category_id: "no-category",
@@ -181,7 +193,16 @@ export function ProductFormModal({
         title: formData.title.trim(),
         description: formData.description.trim(),
         price: parseFloat(formData.price),
+        price_before: formData.price_before.trim() ? Number(formData.price_before) : undefined,
         image: formData.image.trim() || undefined,
+        images: formData.images
+          .split(/\n|,/)
+          .map((value) => value.trim())
+          .filter(Boolean),
+        colors: formData.colors
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
         stock: parseInt(formData.stock),
         sku: formData.sku.trim() || undefined,
         category_id:
@@ -318,6 +339,29 @@ export function ProductFormModal({
           </div>
 
           <div>
+            <Label htmlFor="price-before">Price before discount</Label>
+            <Input
+              id="price-before"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.price_before}
+              onChange={(e) => handleInputChange("price_before", e.target.value)}
+              placeholder="29.99"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="colors">Colors</Label>
+            <Input
+              id="colors"
+              value={formData.colors}
+              onChange={(e) => handleInputChange("colors", e.target.value)}
+              placeholder="Black, White, Red"
+            />
+          </div>
+
+          <div>
             <Label htmlFor="sku">SKU</Label>
             <Input
               id="sku"
@@ -365,7 +409,7 @@ export function ProductFormModal({
           </div>
 
           <div>
-            <Label htmlFor="image">Product Image</Label>
+            <Label htmlFor="image">Featured image</Label>
 
             <div className="mt-2 flex items-center gap-2">
               <Button
@@ -399,10 +443,22 @@ export function ProductFormModal({
               />
             </div>
 
-            {formData.image.trim() && (
-              <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+            <div className="mt-3">
+              <Label htmlFor="images">Additional product images</Label>
+              <textarea
+                id="images"
+                value={formData.images}
+                onChange={(e) => handleInputChange("images", e.target.value)}
+                placeholder="One URL per line or comma-separated"
+                rows={3}
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {(formData.image.trim() || formData.images.trim()) && (
+              <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-2">
                 <img
-                  src={formData.image}
+                  src={formData.image || formData.images.split(/\n|,/)[0]}
                   alt="Product preview"
                   className="h-28 w-full object-cover"
                   onError={(e) => {

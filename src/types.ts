@@ -1,11 +1,14 @@
 export interface ProductType {
-  product_id: string;
+  product_id: string;               // uuid string
   title: string;
-  description: string;
-  price: number;
-  image?: string;
-  stock: number;
+  description?: string;
   sku?: string;
+  price: number;                    // current price
+  price_before?: number;            // price before discount (optional)
+  image?: string;                   // primary / featured image (kept for backwards compatibility)
+  images?: string[];                // additional images (URLs)
+  colors?: string[];                // available colors
+  stock: number;                    // inventory count
   category_id?: number;
   created_at?: string;
   updated_at?: string;
@@ -101,6 +104,7 @@ export interface ReviewType {
 export interface CategoryType {
   id: number;
   name: string;
+  slug?: string;
   description: string;
   parent_id?: number;
 }

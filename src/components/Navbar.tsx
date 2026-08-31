@@ -16,23 +16,21 @@ export function Navbar() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Handle mounting state
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Prevent hydration mismatch by not rendering theme-dependent content until mounted
   if (!mounted) {
-    return null; // Return null on first render to avoid hydration mismatch
+    return null;
   }
 
   return (
-    <nav className="border-border bg-background/80 supports-[backdrop-filter]:bg-background/60 z-60 w-full border-b backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/60">
       <div className="mx-4 flex h-20 items-center">
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="hover:bg-muted/50 rounded-full transition-colors duration-200" />
+          <SidebarTrigger className="rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10" />
           <Link href="/" className="flex cursor-pointer items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-slate-300 text-lg font-black text-white shadow-lg shadow-blue-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-slate-300 text-lg font-black text-white shadow-lg shadow-blue-500/25">
               D
             </div>
             <div>
@@ -65,7 +63,7 @@ export function Navbar() {
               onClick={() => router.push("/profile")}
             >
               <User className="h-[1.1rem] w-[1.1rem]" />
-              <span className="sr-only">{user ? "Profile" : "Sign in"}</span>
+              <span className="sr-only">Profile</span>
             </Button>
           ) : (
             <Button
@@ -82,11 +80,11 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-10 w-10 cursor-pointer rounded-full border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+              className="relative h-10 w-10 cursor-pointer rounded-full border border-white/10 bg-gradient-to-r from-sky-500/15 to-blue-500/10 text-slate-100 hover:border-sky-400/40 hover:bg-sky-500/10"
             >
               <ShoppingCart className="h-[1.1rem] w-[1.1rem]" />
               {totalItems > 0 && (
-                <span className="bg-gradient-to-r from-blue-500 to-slate-300 text-primary-foreground absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-sky-400 to-blue-500 text-[10px] font-bold text-slate-950 shadow-md shadow-blue-500/30">
                   {totalItems}
                 </span>
               )}

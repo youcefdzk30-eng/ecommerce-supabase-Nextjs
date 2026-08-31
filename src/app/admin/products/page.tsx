@@ -156,9 +156,9 @@ export default function AdminProductsPage() {
         {filteredProducts.map((product) => (
           <Card key={product.product_id} className="overflow-hidden">
             <div className="relative h-48 bg-gray-100">
-              {product.image ? (
+              {product.images?.[0] || product.image ? (
                 <Image
-                  src={product.image}
+                  src={product.images?.[0] || product.image || ""}
                   alt={product.title}
                   fill
                   className="object-cover"
@@ -194,10 +194,17 @@ export default function AdminProductsPage() {
               <CardTitle className="line-clamp-2 text-lg">
                 {product.title}
               </CardTitle>
-              <div className="flex items-center justify-between">
-                <span className="text-primary text-2xl font-bold">
-                  {formatCurrency(product.price)}
-                </span>
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-primary text-2xl font-bold">
+                    {formatCurrency(product.price)}
+                  </span>
+                  {product.price_before && Number(product.price_before) > Number(product.price) && (
+                    <div className="text-muted-foreground text-xs line-through">
+                      {formatCurrency(product.price_before)}
+                    </div>
+                  )}
+                </div>
                 <span className="text-muted-foreground text-sm">
                   Stock: {product.stock}
                 </span>
@@ -209,6 +216,16 @@ export default function AdminProductsPage() {
                 {product.description}
               </p>
 
+              {product.colors && product.colors.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-1">
+                  {product.colors.slice(0, 4).map((color) => (
+                    <Badge key={color} variant="secondary" className="text-[10px]">
+                      {color}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
               <div className="mb-4 space-y-2">
                 {product.sku && (
                   <div className="text-muted-foreground text-xs">
@@ -218,6 +235,11 @@ export default function AdminProductsPage() {
                 {product.category && (
                   <div className="text-muted-foreground text-xs">
                     Category: {product.category.name}
+                  </div>
+                )}
+                {product.images && product.images.length > 1 && (
+                  <div className="text-muted-foreground text-xs">
+                    Images: {product.images.length}
                   </div>
                 )}
                 {product.total_reviews !== undefined && (

@@ -61,14 +61,14 @@ export async function createCart() {
       }
 
       if (error.code !== '42703' && error.code !== '42P01') {
-        console.error('Error creating cart:', error);
+        console.error('Error creating cart:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
       }
     }
 
     toast.error('Failed to create cart');
     return null;
   } catch (error) {
-    console.error('Error in createCart:', error);
+    console.error('Error in createCart:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     toast.error('Something went wrong');
     return null;
   }

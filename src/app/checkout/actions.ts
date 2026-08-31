@@ -48,7 +48,16 @@ async function getPolarProduct(): Promise<string> {
 	}
 }
 
-export async function createPolarCheckout() {
+export async function createPolarCheckout(orderInfo?: {
+  deliveryType?: string;
+  recipientName?: string;
+  phone?: string;
+  addressLine?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+}) {
 	try {
 		// Get authenticated user
 		const user = await getAuthenticatedUser()
@@ -122,6 +131,46 @@ export async function createPolarCheckout() {
 			metadata?: Record<string, string>
 		}>> = {}
 
+		// Insert order record (if orders table exists) so admin can see details immediately
+		try {
+			const itemsForOrder = cartItems.map((item: any) => ({
+				product_id: item.product_id,
+				product_title: (item.product as ProductType | null | undefined)?.title || null,
+				quantity: item.quantity,
+				price: item.price,
+			}));
+
+			const totalAmount = cartItems.reduce((acc: number, it: any) => acc + Number(it.price) * Number(it.quantity), 0);
+
+			const { error: orderError } = await supabase
+				.from('orders')
+				.insert([
+					{
+						user_id: user.id,
+						cart_id: cart.id,
+						status: 'pending_payment',
+						delivery_type: orderInfo?.deliveryType || 'home',
+						recipient_name: orderInfo?.recipientName || null,
+						phone: orderInfo?.phone || null,
+						address_line: orderInfo?.addressLine || null,
+						city: orderInfo?.city || null,
+						state: orderInfo?.state || null,
+						postal_code: orderInfo?.postalCode || null,
+						country: orderInfo?.country || null,
+						items: itemsForOrder,
+						total_amount: totalAmount,
+					},
+				])
+				.select('*')
+				.maybeSingle();
+
+			if (orderError) {
+				console.warn('Order insert failed (orders table might be missing):', orderError);
+			}
+		} catch (e) {
+			console.warn('Order insert threw:', e);
+		}
+
 		// Single price entry with total amount and all items in metadata
 		prices[polarProductId] = [{
 			amountType: 'fixed' as const,
@@ -130,6 +179,7 @@ export async function createPolarCheckout() {
 			metadata: {
 				cart_items: JSON.stringify(cartItemsData),
 				total_items: cartItems.length.toString(),
+				delivery: JSON.stringify(orderInfo || {}),
 			},
 		}]
 
