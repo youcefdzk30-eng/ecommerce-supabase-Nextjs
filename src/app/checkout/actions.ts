@@ -57,6 +57,8 @@ export async function createPolarCheckout(orderInfo?: {
   state?: string;
   postalCode?: string;
   country?: string;
+  governorate?: string;
+  municipality?: string;
 }) {
 	try {
 		// Get authenticated user
@@ -68,30 +70,42 @@ export async function createPolarCheckout(orderInfo?: {
 		// Get Supabase client
 		const supabase = await createServerSupabase()
 
-		// Get active cart. Some DB setups omit the status column, so fall back gracefully.
-		let cartQuery = supabase.from('carts').select('*').eq('user_id', user.id)
-		let { data: cart, error: cartError } = await cartQuery.eq('status', 'active').maybeSingle()
+		let userCartQuery = supabase
+			.from('carts')
+			.select('*')
+			.eq('user_id', user.id)
+			.order('created_at', { ascending: false })
 
-		if (cartError && cartError.code === '42703') {
-			;({ data: cart, error: cartError } = await cartQuery.maybeSingle())
+		let { data: carts, error: cartsError } = await userCartQuery
+
+		let cart = carts?.find((entry) => entry.status === 'active') ?? carts?.[0] ?? null
+
+		if (!cart && (!cartsError || cartsError.code !== '42P01')) {
+			const { data: insertedCart, error: insertError } = await supabase
+				.from('carts')
+				.insert({ user_id: user.id, status: 'active' })
+				.select('*')
+				.maybeSingle()
+
+			if (!insertError && insertedCart) {
+				cart = insertedCart
+			}
 		}
 
-		if (cartError || !cart) {
+		if (!cart) {
 			throw new Error('No active cart found')
 		}
 
-		// Get cart items with product details
 		const { data: cartItems, error: itemsError } = await supabase
 			.from('cart_items')
-			.select(
-				`
-				*,
-				product:products(*)
-			`
-			)
+			.select('*')
 			.eq('cart_id', cart.id)
 
-		if (itemsError || !cartItems || cartItems.length === 0) {
+		if (itemsError) {
+			throw new Error(`Unable to load cart items: ${itemsError.message}`)
+		}
+
+		if (!cartItems || cartItems.length === 0) {
 			throw new Error('Cart is empty')
 		}
 
@@ -135,7 +149,7 @@ export async function createPolarCheckout(orderInfo?: {
 		try {
 			const itemsForOrder = cartItems.map((item: any) => ({
 				product_id: item.product_id,
-				product_title: (item.product as ProductType | null | undefined)?.title || null,
+				product_title: item.product_title || null,
 				quantity: item.quantity,
 				price: item.price,
 			}));
@@ -154,9 +168,10 @@ export async function createPolarCheckout(orderInfo?: {
 						phone: orderInfo?.phone || null,
 						address_line: orderInfo?.addressLine || null,
 						city: orderInfo?.city || null,
-						state: orderInfo?.state || null,
+						state: orderInfo?.state || orderInfo?.governorate || null,
 						postal_code: orderInfo?.postalCode || null,
 						country: orderInfo?.country || null,
+						municipality: orderInfo?.municipality || null,
 						items: itemsForOrder,
 						total_amount: totalAmount,
 					},

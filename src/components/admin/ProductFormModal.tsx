@@ -71,10 +71,15 @@ export function ProductFormModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const uploadProductImage = async (file: File): Promise<string | null> => {
+    if (!file.type.startsWith("image/")) {
+      console.error("Selected file is not an image");
+      return null;
+    }
+
     const fileExt = file.name.split(".").pop() || "jpg";
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${fileExt}`;
     const filePath = `products/${fileName}`;
-    const bucketNames = ["products", "images", "default", "public", "storage"];
+    const bucketNames = ["products", "images", "public", "storage", "default"];
 
     let lastError: Error | null = null;
 
@@ -92,7 +97,9 @@ export function ProductFormModal({
             .from(bucketName)
             .getPublicUrl(data.path);
 
-          return publicUrlData?.publicUrl || null;
+          if (publicUrlData?.publicUrl) {
+            return publicUrlData.publicUrl;
+          }
         }
 
         lastError = new Error(error?.message || `Failed to upload to ${bucketName}`);
