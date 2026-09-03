@@ -7,38 +7,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createPolarCheckout } from "./actions";
 import { useCart } from "@/context/CartContext";
+import algeriaData from "@/data/algeria.json";
 
-const GOVERNORATES = Array.from({ length: 69 }, (_, index) => {
-  const id = index + 1;
-  const isReal = id <= 14;
-  const baseNames = [
-    "دمشق",
-    "ريف دمشق",
-    "حمص",
-    "حماة",
-    "حلب",
-    "اللاذقية",
-    "دير الزور",
-    "السويداء",
-    "درعا",
-    "الرقة",
-    "إدلب",
-    "القنيطرة",
-    "المرقب",
-    "طرطوس",
-  ];
-
-  const name = isReal ? baseNames[index] : `الولاية ${id}`;
-  const municipalityCount = Math.max(3, (id % 6) + 2);
-
-  return {
-    id,
-    name,
-    municipalities: Array.from({ length: municipalityCount }, (_, municipalityIndex) =>
-      `البلدية ${municipalityIndex + 1}`
-    ),
-  };
-});
+const GOVERNORATES = algeriaData.map((wilaya) => ({
+  id: wilaya.number,
+  name: wilaya.name,
+  municipalities: wilaya.dairas.flatMap((daira) => daira.communes),
+}));
 
 export default function CheckoutRedirect() {
   const router = useRouter();
@@ -85,7 +60,7 @@ export default function CheckoutRedirect() {
         municipality,
         city: selectedGovernorate.name,
         state: selectedGovernorate.name,
-        country: "Syria",
+        country: "Algeria",
       });
 
       if (!result.success || !result.checkoutUrl) {
@@ -227,4 +202,3 @@ export default function CheckoutRedirect() {
     </div>
   );
 }
-
