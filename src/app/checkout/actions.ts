@@ -4,10 +4,15 @@ import { Polar } from '@polar-sh/sdk'
 import { createServerSupabase, getAuthenticatedUser } from '@/lib/supabase/server'
 import { ProductType } from '@/types'
 
-const polar = new Polar({
-	accessToken: process.env.POLAR_ACCESS_TOKEN!,
-	server: 'sandbox',
-})
+const polarAccessToken = process.env.POLAR_ACCESS_TOKEN?.trim()
+const polarServer = process.env.POLAR_SERVER === 'production' ? 'production' : 'sandbox'
+
+const polar = polarAccessToken
+	? new Polar({
+			accessToken: polarAccessToken,
+			server: polarServer,
+		})
+	: null
 
 /**
  * Get an existing Polar product for e-commerce checkouts
@@ -18,6 +23,10 @@ async function getPolarProduct(): Promise<string> {
 	const productId = process.env.POLAR_PRODUCT_ID
 	if (productId) {
 		return productId
+	}
+
+	if (!polar) {
+		throw new Error('POLAR_ACCESS_TOKEN is missing. Add a valid Polar token to .env.local and restart Next.js.')
 	}
 
 	// Otherwise, list existing products and find one
@@ -61,6 +70,10 @@ export async function createPolarCheckout(orderInfo?: {
   municipality?: string;
 }) {
 	try {
+		if (!polar) {
+			throw new Error('Polar is not configured. Set POLAR_ACCESS_TOKEN in .env.local and restart the dev server.')
+		}
+
 		// Get authenticated user
 		const user = await getAuthenticatedUser()
 		if (!user) {
@@ -228,4 +241,3 @@ export async function createPolarCheckout(orderInfo?: {
 		}
 	}
 }
-
