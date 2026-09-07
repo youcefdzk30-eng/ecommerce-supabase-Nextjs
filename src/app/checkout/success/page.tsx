@@ -22,7 +22,7 @@ function SuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { clearCart } = useCart();
-  const checkoutId = searchParams.get("checkout_id");
+  const orderId = searchParams.get("order_id");
   const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary] = useState<CheckoutSummary | null>(null);
 
@@ -61,7 +61,7 @@ function SuccessContent() {
           <CardContent className="flex flex-col items-center justify-center py-8">
             <LoadingSpinner />
             <p className="text-muted-foreground mt-4">
-              يرجى الانتظار ريثما نؤكد الدفع وننشئ تفاصيل الطلب.
+              يرجى الانتظار ريثما نجهز تفاصيل طلب الدفع عند الاستلام.
             </p>
           </CardContent>
         </Card>
@@ -81,7 +81,8 @@ function SuccessContent() {
         <CardContent className="space-y-6 text-slate-200">
           <div className="text-center">
             <p className="text-slate-300">شكرًا لك على طلبك، تم استلام الطلب بنجاح وسيتم تجهيز مشترياتك قريبًا.</p>
-            {checkoutId && <p className="mt-2 text-sm text-slate-400">رقم الطلب: {checkoutId}</p>}
+            {orderId && <p className="mt-2 text-sm text-slate-400">رقم الطلب: {orderId}</p>}
+            <p className="mt-2 text-sm font-medium text-emerald-300">طريقة الدفع: الدفع عند الاستلام</p>
           </div>
 
           {summary && (

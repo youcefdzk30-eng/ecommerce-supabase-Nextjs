@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { createPolarCheckout } from "./actions";
+import { createCashOnDeliveryOrder } from "./actions";
 import { useCart } from "@/context/CartContext";
 import algeriaData from "@/data/algeria.json";
 
@@ -52,7 +52,7 @@ export default function CheckoutRedirect() {
     setError(null);
 
     try {
-      const result = await createPolarCheckout({
+      const result = await createCashOnDeliveryOrder({
         deliveryType,
         recipientName: recipientName.trim(),
         phone: phone.trim(),
@@ -63,8 +63,8 @@ export default function CheckoutRedirect() {
         country: "Algeria",
       });
 
-      if (!result.success || !result.checkoutUrl) {
-        throw new Error(result.error || "فشل في إنشاء جلسة الدفع");
+      if (!result.success || !result.orderId) {
+        throw new Error(result.error || "فشل في تسجيل الطلب");
       }
 
       sessionStorage.setItem(
@@ -86,13 +86,13 @@ export default function CheckoutRedirect() {
       );
 
       await clearCart();
-      toast.success("يتم تجهيز الدفع...");
-      window.location.href = result.checkoutUrl;
+      toast.success("تم تسجيل الطلب بالدفع عند الاستلام");
+      router.push(`/checkout/success?order_id=${result.orderId}`);
     } catch (err) {
       console.error("Error creating checkout session:", err);
       setError(err instanceof Error ? err.message : "حدث خطأ أثناء إنشاء الطلب");
       setIsLoading(false);
-      toast.error("فشل في بدء الدفع. حاول مرة أخرى.");
+      toast.error("فشل في تسجيل الطلب. حاول مرة أخرى.");
     }
   }
 
